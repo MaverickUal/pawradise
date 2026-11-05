@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && ((auth.uid === $uid && (data.exists() ? newData.child('role').val() === data.child('role').val() : newData.child('role').val() === 'customer')) || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+    "bookings": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || (query.orderByChild === 'customerUid' && query.equalTo === auth.uid))",
+      "$bookingId": {
+        ".read": "auth != null && (data.child('customerUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || (!data.exists() && newData.child('customerUid').val() === auth.uid) || (data.exists() && data.child('customerUid').val() === auth.uid && newData.child('customerUid').val() === auth.uid))"
+      },
+      ".indexOn": [
+        "customerUid",
+        "status",
+        "createdAt"
+      ]
+    }
+  }
+}
